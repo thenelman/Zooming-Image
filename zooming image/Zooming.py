@@ -4,6 +4,7 @@ Created on Tue Mar 27 20:39:45 2018
 
 @author: L NelSoN ManGanGchA
 """
+from __future__ import absolute_import, division, print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -33,7 +34,7 @@ def imageZoom(im,scale,pivot): # zooms the image by scale times
 def zoom(image,scale,pivot): #helper function to zoom the pixels of each color
     row , column = image.shape
     imageList = image.tolist() # convert the numpy.ndarray to a list object
-    r = rowOperation(imageList,0,scale)
+    rowOperation(imageList,0,scale)
     i = 0
     while(i  <  len(imageList)-1):
         rowOperation(imageList,i+1,scale)
@@ -69,8 +70,6 @@ def rowOperation(img,index,scale): #perform row operation on "index" row of the 
 def colOperation(img,index,scale): #perform column operation between "index" and "index+1" columns of the list of list "img"
     T = []
     OP_List = []
-    l1 = img[index]
-    l2 = img[index + 1]
     ind = 0
     while ( ind < len(img[index])):
         Q1 = img[index][ind]
@@ -95,34 +94,43 @@ def colOperation(img,index,scale): #perform column operation between "index" and
 
 def main():
     #import the image
-    ImageFilename = input("Enter image path")
+    ImageFilename = input("Enter image path : ")
     image = plt.imread(ImageFilename)
-    k = int(input("Enter zooming factor")) #zooming factor
+    row , col, dim = image.shape
+    k = int(input("Enter zooming factor : ")) #zooming factor
     """pivot row position should lie between [row/2] and [(k*(row-1)+1) - (row/2)]"""
     """pivot column position should lie between [column / 2] and [(k*(column-1)+1) - (column / 2)]"""
-    rw = int(input("Enter the pivot row position. ")) 
-    cl = int(input("Enter the pivot column position. "))
-    pivot = Pivot(rw,cl)
+    print("Image size : {0} x {1}".format(row,col))
+    try:
+        rw = int(input("Enter valid pivot row position: ")) 
+        cl = int(input("Enter valid pivot column position: "))
+        assert ((rw >= row//2) and (rw <= ((k*(row-1)+1) - (row//2))))
+        assert ((cl >= col//2) and (rw <= ((k*(col-1)+1) - (col//2))))
+        
+        pivot = Pivot(rw,cl)
+        
+        #show original image
+        plt.imshow(image)
+        plt.show()
     
-    #show original image
-    plt.imshow(image)
-    plt.show()
+        #Zoom the image by k times
+        print("Zooming the image by {} times".format(k))
+        newImage = imageZoom(image,k,pivot)
     
-    #Zoom the image by k times
-    newImage = imageZoom(image,k,pivot)
+        #shape of the zoomed image
+        #must be of the same size of the original image
+        print(newImage.shape)
     
-    #shape of the zoomed image
-    #must be of the same size of the original image
-    print(newImage.shape)
+        #show the new zoomed image
+        plt.imshow(newImage)
+        plt.show()
     
-    #show the new zoomed image
-    plt.imshow(newImage)
-    plt.show()
-    
-    #save the zoomed image
-    newFilename = input("Enter the filename to save the zoomed Image")
+        #save the zoomed image
+        newFilename = input("Enter the filename to save the zoomed Image")
 
-    plt.imsave(newFilename,newImage)
+        plt.imsave(newFilename,newImage)
+    except AssertionError:
+        print("Enter a valid pivot position.\nRow position should between {0} and {1}.\nColumn position should be between {2} and {3}".format((row//2),((k*(row-1)+1) - (row//2)),(col//2),((k*(col-1)+1) - (col//2))))
     
 
 if __name__ =="__main__":
