@@ -10,9 +10,7 @@ import matplotlib.pyplot as plt
 
 class Pivot: 
     "class to store the co ordinate of the pivot"
-    """pivot row position should lie between [row/2] and [(k*(row-1)+1) - (row/2)]"""
-    """pivot column position should lie between [column / 2] and [(k*(column-1)+1) - (column / 2)]"""
-
+    
     def __init__(self,rw,cl):
         self.rw = rw #row position
         self.cl = cl #col position
@@ -40,9 +38,23 @@ def zoom(image,scale,pivot): #helper function to zoom the pixels of each color
         rowOperation(imageList,i+1,scale)
         colOperation(imageList,i,scale)
         i = i+scale
-    startRow = pivot.rw - (row//2)
+    
+    
+    if(pivot.rw < row//2):
+        startRow = 0
+    elif(pivot.rw > ((scale*(row-1)+1) - (row//2))):
+        startRow = ((scale*(row-1)+1) - row)
+    else:
+        startRow = pivot.rw - (row//2)
+
+    if(pivot.cl < column//2):
+        startCol = 0
+    elif(pivot.cl > ((scale*(column-1)+1) - (column//2))):
+        startCol = ((scale*(column-1)+1) - column)
+    else:
+        startCol = pivot.cl - (column//2)
+    
     endRow = startRow + row
-    startCol = pivot.cl - (column//2)
     endCol = startCol + column
     newImage = np.array(imageList,dtype=np.uint8) #convert back to numpy.ndarray
     return newImage[startRow:endRow,startCol:endCol]
@@ -98,39 +110,43 @@ def main():
     image = plt.imread(ImageFilename)
     row , col, dim = image.shape
     k = int(input("Enter zooming factor : ")) #zooming factor
-    """pivot row position should lie between [row/2] and [(k*(row-1)+1) - (row/2)]"""
-    """pivot column position should lie between [column / 2] and [(k*(column-1)+1) - (column / 2)]"""
+    
     print("Image size : {0} x {1}".format(row,col))
-    try:
-        rw = int(input("Enter valid pivot row position: ")) 
-        cl = int(input("Enter valid pivot column position: "))
-        assert ((rw >= row//2) and (rw <= ((k*(row-1)+1) - (row//2))))
-        assert ((cl >= col//2) and (rw <= ((k*(col-1)+1) - (col//2))))
+    
+    rw = int(input("Enter valid pivot row position: ")) 
+    cl = int(input("Enter valid pivot column position: "))
         
-        pivot = Pivot(rw,cl)
         
-        #show original image
-        plt.imshow(image)
-        plt.show()
+    pivot = Pivot(rw,cl)
     
-        #Zoom the image by k times
-        print("Zooming the image by {} times".format(k))
-        newImage = imageZoom(image,k,pivot)
+    if(pivot.rw < 0 or pivot.rw > (k*(row-1)+1)):
+        print("Pivot row is out of bound")
+        exit(1);
     
-        #shape of the zoomed image
-        #must be of the same size of the original image
-        print(newImage.shape)
+    if(pivot.cl < 0 or pivot.cl > (k*(col - 1)+1)):
+        print("Pivot column is out of bound")
+        exit(1);
+        
+    #show original image
+    plt.imshow(image)
+    plt.show()
     
-        #show the new zoomed image
-        plt.imshow(newImage)
-        plt.show()
+    #Zoom the image by k times
+    print("Zooming the image by {} times".format(k))
+    newImage = imageZoom(image,k,pivot)
     
-        #save the zoomed image
-        newFilename = input("Enter the filename to save the zoomed Image")
+    #shape of the zoomed image
+    #must be of the same size of the original image
+    print(newImage.shape)
+    
+    #show the new zoomed image
+    plt.imshow(newImage)
+    plt.show()
+    
+    #save the zoomed image
+    newFilename = input("Enter the filename to save the zoomed Image")
 
-        plt.imsave(newFilename,newImage)
-    except AssertionError:
-        print("Enter a valid pivot position.\nRow position should between {0} and {1}.\nColumn position should be between {2} and {3}".format((row//2),((k*(row-1)+1) - (row//2)),(col//2),((k*(col-1)+1) - (col//2))))
+    plt.imsave(newFilename,newImage)
     
 
 if __name__ =="__main__":
